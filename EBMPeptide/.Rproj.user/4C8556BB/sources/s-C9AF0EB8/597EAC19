@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1597614372984.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "597EAC19",
+    "lastKnownWriteTime" : 1597614265,
+    "last_content_update" : 1597614265,
+    "path" : "~/Documents/Work/Projects/EBMPeptide/EBMPeptide/inst/examples/CPTAC.R",
+    "project_path" : "inst/examples/CPTAC.R",
+    "properties" : {
+        "cursorPosition" : "20,0",
+        "marks" : "<:15,12\n>:15,12",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

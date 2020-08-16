@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1597614374114.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "8969BAD7",
+    "lastKnownWriteTime" : 1597614256,
+    "last_content_update" : 1597614256,
+    "path" : "~/Documents/Work/Projects/EBMPeptide/EBMPeptide/inst/examples/GST_ABPP.R",
+    "project_path" : "inst/examples/GST_ABPP.R",
+    "properties" : {
+        "cursorPosition" : "17,44",
+        "marks" : "<:0,0\n>:17,43",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

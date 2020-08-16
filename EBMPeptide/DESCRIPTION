@@ -1,0 +1,18 @@
+Package: EBMPeptide
+Type: Package
+Title: EBM Analysis On Peptide-Level LC-MS Proteomics Data
+Version: 0.1.0
+Author: Bryan Killinger
+Maintainer: Bryan Killinger <bryankpnnl@gmail.com>
+Description: Performs eBayes to compute peptide level P-values that are combined with EBM to obtain protein level P-values.
+License: Apache License 2.0
+Encoding: UTF-8
+biocViews:
+Imports:
+    dplyr,
+    imputeLCMD,
+    raster,
+    EmpiricalBrownsMethod,
+    limma
+Depends: 
+    R (>= 2.10)
