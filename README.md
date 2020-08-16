@@ -14,7 +14,7 @@ install_github("brykpnl/ebm_peptide", subdir="EBMPeptide")
 library(EBMPeptide)
 ```
 
-See example data and analysis scripts in the inst/testdata and inst/examples folders.
+See example data and analysis scripts in the EBMPeptide/inst/testdata and EBM/inst/examples folders.
 
 See more help by entering ```?ebm_analysis``` into your R command prompt.
 
