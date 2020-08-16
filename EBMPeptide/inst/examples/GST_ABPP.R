@@ -2,7 +2,8 @@ library(EBMPeptide)
 set.seed(1)
 
 #Path to .csv file containing peptide-level intensity data
-data_path <- "./inst/testdata/GST_peptides.csv"
+dir <- system.file(package="EBMPeptide")
+data_path <- file.path(dir, "testdata/GST_peptides.csv")
 
 #Group data for peptide-level intensity data by sample (column)
 groups <- factor(c("noUV", "noUV", "noUV", "UV", "UV", "UV"))
