@@ -1,4 +1,4 @@
-# ebm_peptide
+# EBM Peptide
 
 Detect differentially abundant proteins from bottom-up LC-MS proteomics data by combining peptide level P-values with Empirical Browns Method (EBM).
 
