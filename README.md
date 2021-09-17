@@ -20,4 +20,6 @@ You can find example data and analysis scripts in the EBMPeptide/inst/testdata a
 
 See more help for running your own analysis by entering ```?ebm_analysis``` into your R command prompt.
 
+If you use this package, please cite our paper [Detecting differential protein abundance by combining peptide level P-values](https://pubs.rsc.org/en/content/articlelanding/2020/MO/D0MO00045K).
+
 For more information about EBM, see Poole's paper on combining dependent P-values at https://academic.oup.com/bioinformatics/article/32/17/i430/2450768 and their EBM implementation in R, Matlab, and Python at https://github.com/IlyaLab/CombiningDependentPvaluesUsingEBM.
