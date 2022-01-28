@@ -19,7 +19,7 @@ setClass("proteomics", slots=list(Protein="character",
                                   GroupData="list"))
 
 #Input: peptide intensities, optional log2_transform as TRUE or FALSE.
-#Ouput: missing-value imputed peptide intensities optionally log2 transformed.
+#Output: missing-value imputed peptide intensities optionally log2 transformed.
 prepare <- function(intensities, log2_transform) {
   if (log2_transform==TRUE) {
     imputed <- imputeLCMD::impute.MinProb(log2(intensities));
@@ -69,12 +69,26 @@ p_combine <- function(p_right, p_left, proteins, peptides, data.matrix) {
 #Output: Combined protein level P-values.
 # NOTE: Wraps together eBayes peptide level tests and EBM combination.
 compare_peptides <- function(A_data, B_data, design_matrix, contrast_matrix, proteins, peptides) {
+
+  peptide_fc <- rowMeans(A_data) - rowMeans(B_data)
+  protein_fc <- aggregate(peptide_fc, list(proteins), mean, na.action = na.omit)
+  n_peptides <- plyr::count(proteins)
+
+  #print(protein_fc)
+  #print(n_peptides)
+  #print(colnames(protein_fc))
+
+
   data.matrix <- cbind(A_data, B_data)
   ebayes_fit <- limma::eBayes(limma::contrasts.fit(fit=limma::lmFit(data.matrix, design=design_matrix), contrast=contrast_matrix))
   ebayes_p <- split_pvals(ebayes_fit)
   ebayes_combined <- p_combine(ebayes_p$p_right, ebayes_p$p_left, proteins, peptides, data.matrix)
+  ebayes_combined$fc <- protein_fc[, 2]
+  ebayes_combined$n_peptides <- n_peptides[, 2]
   colnames(ebayes_combined) <- c("p_right",
-                                 "p_left")
+                                 "p_left",
+                                 "fc",
+                                 "n_peptides")
   return(ebayes_combined)
 }
 
@@ -83,11 +97,12 @@ compare_peptides <- function(A_data, B_data, design_matrix, contrast_matrix, pro
 # NOTE: min_obs refers to the required minimun number of observations in either comparative group for a peptide to be considered for analysis.
 #Output: proteomics S4 object containing all input data and P-value results for EBM combination.
 # NOTE: P-values can be found for each comparison in the Pvalues slot.
-ebm_analysis <- function(data_path, groups, comparisons, min_obs=3, log2_transform=TRUE) {
+ebm_analysis <- function(data_path, groups, comparisons, min_obs=3, log2_transform=TRUE, sep=",") {
+  set.seed(1)
   design_matrix <- model.matrix(~0 + groups)
   colnames(design_matrix) <- levels(groups)
   contrast_matrix <- limma::makeContrasts(contrasts=comparisons, levels=design_matrix)
-  raw_data <- read.table(data_path, header=TRUE, sep=",")
+  raw_data <- read.delim(data_path, header=TRUE, sep=sep)
   raw_data[raw_data==0] <- NA
   data <- new("proteomics",
               Protein=as.character(raw_data$Protein),
@@ -100,29 +115,38 @@ ebm_analysis <- function(data_path, groups, comparisons, min_obs=3, log2_transfo
     data@GroupData[[sample]][["Raw Data"]] <- data@Intensities[, which(select_samples==1)]
   }
   for (sample_contrast in colnames(data@Contrasts)) {
-    A_group <- names(which(data@Contrasts[,sample_contrast] == 1) == TRUE)
-    A_passing <- row.names(data@GroupData[[A_group]][["Raw Data"]][rowSums(!is.na(data@GroupData[[A_group]][["Raw Data"]])) >= min_obs, ])
-    B_group <- names(which(data@Contrasts[,sample_contrast] == -1) == TRUE)
-    B_passing <- row.names(data@GroupData[[B_group]][["Raw Data"]][rowSums(!is.na(data@GroupData[[B_group]][["Raw Data"]])) >= min_obs, ])
-    all_passing <- unique(c(A_passing, B_passing))
-    outlog <- capture.output({
-      A_data <- prepare(data@GroupData[[A_group]][["Raw Data"]][all_passing, ], log2_transform)
-      B_data <- prepare(data@GroupData[[B_group]][["Raw Data"]][all_passing, ], log2_transform)
-    })
-    proteins <- data@Protein[as.numeric(all_passing)]
-    peptides <- data@Peptide[as.numeric(all_passing)]
-    ab_groups <- factor(c(rep(A_group, times=dim(A_data)[2]),
-                          rep(B_group, times=dim(B_data)[2])))
-    ab_design_matrix <- model.matrix(~0 + ab_groups)
-    colnames(ab_design_matrix) <- levels(ab_groups)
-    contrast_cmd <- paste("limma::makeContrasts(", sample_contrast, ", levels = ab_design_matrix)", sep = '"')
-    ab_contrast_matrix <- eval(parse(text = contrast_cmd))
-    data@Pvalues[[sample_contrast]] <- compare_peptides(A_data,
-                                                        B_data,
-                                                        ab_design_matrix,
-                                                        ab_contrast_matrix,
-                                                        proteins,
-                                                        peptides)
+    print(sample_contrast)
+    tryCatch(
+      expr = {
+        A_group <- names(which(data@Contrasts[,sample_contrast] == 1) == TRUE)
+        A_passing <- row.names(data@GroupData[[A_group]][["Raw Data"]][rowSums(!is.na(data@GroupData[[A_group]][["Raw Data"]])) >= min_obs, ])
+        B_group <- names(which(data@Contrasts[,sample_contrast] == -1) == TRUE)
+        B_passing <- row.names(data@GroupData[[B_group]][["Raw Data"]][rowSums(!is.na(data@GroupData[[B_group]][["Raw Data"]])) >= min_obs, ])
+        all_passing <- unique(c(A_passing, B_passing))
+        outlog <- capture.output({
+          A_data <- prepare(data@GroupData[[A_group]][["Raw Data"]][all_passing, ], log2_transform)
+          B_data <- prepare(data@GroupData[[B_group]][["Raw Data"]][all_passing, ], log2_transform)
+        })
+        proteins <- data@Protein[as.numeric(all_passing)]
+        peptides <- data@Peptide[as.numeric(all_passing)]
+        ab_groups <- factor(c(rep(A_group, times=dim(A_data)[2]),
+                              rep(B_group, times=dim(B_data)[2])))
+        ab_design_matrix <- model.matrix(~0 + ab_groups)
+        colnames(ab_design_matrix) <- levels(ab_groups)
+        contrast_cmd <- paste("limma::makeContrasts(", sample_contrast, ", levels = ab_design_matrix)", sep = '"')
+        ab_contrast_matrix <- eval(parse(text = contrast_cmd))
+        data@Pvalues[[sample_contrast]] <- compare_peptides(A_data,
+                                                            B_data,
+                                                            ab_design_matrix,
+                                                            ab_contrast_matrix,
+                                                            proteins,
+                                                            peptides)
+    },
+      error = function(e) {
+        print(e)
+      }
+    )
   }
   return(data)
 }
+
